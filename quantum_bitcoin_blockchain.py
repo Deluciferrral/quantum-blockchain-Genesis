@@ -142,7 +142,7 @@ def main():
     print("Tampering Detection Test:")
     print("=" * 80)
     print("Attempting to tamper with block 1...")
-    blockchain.chain[1].data = "Transaction: Alice -> Bob: 100 BTC (tampered)"
+    blockchain.chain[1].data = "Transaction: Alice -\u003e Bob: 100 BTC (tampered)"
     is_valid_after_tampering = blockchain.is_chain_valid()
     print(f"Blockchain is valid after tampering: {is_valid_after_tampering}")
 

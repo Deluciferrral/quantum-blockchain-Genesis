@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Blockchain Genesis - DeFi Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .genesis-address {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .genesis-address strong {
+            color: #ffd700;
+            font-family: monospace;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-item {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .output {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 1rem;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .success {
+            color: #28a745;
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .error {
+            color: #dc3545;
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .quantum-glow {
+            animation: quantumGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes quantumGlow {
+            from { box-shadow: 0 0 20px rgba(102, 126, 234, 0.5); }
+            to { box-shadow: 0 0 30px rgba(118, 75, 162, 0.8); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="quantum-glow">⚛️ Quantum Blockchain Genesis</h1>
+            <p>behold light and it is good</p>
+            <div class="genesis-address">
+                <strong>Genesis Bitcoin Address: bc1qkm8plv5449r3t53dge6x6rmutk3wtkjlwczx8h</strong>
+            </div>
+        </div>
+
+        <div class="stats" id="stats">
+            <div class="stat-item">
+                <div class="stat-value" id="blockCount">-</div>
+                <div class="stat-label">Blocks</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="validatorCount">-</div>
+                <div class="stat-label">Validators</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="bridgeLocked">-</div>
+                <div class="stat-label">BTC Locked</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="currentEpoch">-</div>
+                <div class="stat-label">Current Epoch</div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('wallet')">🔐 Wallet</button>
+            <button class="tab" onclick="showTab('defi')">🏦 DeFi</button>
+            <button class="tab" onclick="showTab('bridge')">🌉 Bitcoin Bridge</button>
+            <button class="tab" onclick="showTab('consensus')">⚖️ Consensus</button>
+        </div>
+
+        <div id="wallet" class="tab-content active">
+            <div class="dashboard">
+                <div class="card">
+                    <h3>Create Wallet</h3>
+                    <button class="btn" onclick="createWallet()">Generate New Quantum Wallet</button>
+                    <div id="walletOutput" class="output" style="display: none;"></div>
+                </div>
+                
+                <div class="card">
+                    <h3>Check Balance</h3>
+                    <div class="form-group">
+                        <label>Wallet Address:</label>
+                        <input type="text" id="balanceAddress" placeholder="Enter wallet address">
+                    </div>
+                    <button class="btn" onclick="checkBalance()">Check Balance</button>
+                    <div id="balanceOutput" class="output" style="display: none;"></div>
+                </div>
+
+                <div class="card">
+                    <h3>Send Transaction</h3>
+                    <div class="form-group">
+                        <label>From Address:</label>
+                        <input type="text" id="fromAddress" placeholder="Your wallet address">
+                    </div>
+                    <div class="form-group">
+                        <label>To Address:</label>
+                        <input type="text" id="toAddress" placeholder="Recipient address">
+                    </div>
+                    <div class="form-group">
+                        <label>Amount:</label>
+                        <input type="number" id="amount" placeholder="Amount to send" step="0.01">
+                    </div>
+                    <button class="btn" onclick="sendTransaction()">Send Transaction</button>
+                    <div id="transactionOutput" class="output" style="display: none;"></div>
+                </div>
+
+                <div class="card">
+                    <h3>Mine Block</h3>
+                    <div class="form-group">
+                        <label>Miner Address:</label>
+                        <input type="text" id="minerAddress" placeholder="Miner reward address">
+                    </div>
+                    <button class="btn" onclick="mineBlock()">Mine Pending Transactions</button>
+                    <div id="miningOutput" class="output" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="defi" class="tab-content">
+            <div class="dashboard">
+                <div class="card">
+                    <h3>Create Liquidity Pool</h3>
+                    <div class="form-group">
+                        <label>Token A:</label>
+                        <input type="text" id="tokenA" placeholder="Token A symbol">
+                    </div>
+                    <div class="form-group">
+                        <label>Token B:</label>
+                        <input type="text" id="tokenB" placeholder="Token B symbol">
+                    </div>
+                    <div class="form-group">
+                        <label>Amount A:</label>
+                        <input type="number" id="amountA" placeholder="Amount of Token A" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Amount B:</label>
+                        <input type="number" id="amountB" placeholder="Amount of Token B" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Creator Address:</label>
+                        <input type="text" id="poolCreator" placeholder="Pool creator address">
+                    </div>
+                    <button class="btn" onclick="createPool()">Create Liquidity Pool</button>
+                    <div id="poolOutput" class="output" style="display: none;"></div>
+                </div>
+
+                <div class="card">
+                    <h3>Token Swap</h3>
+                    <div class="form-group">
+                        <label>Pool ID:</label>
+                        <input type="text" id="swapPoolId" placeholder="Liquidity pool ID">
+                    </div>
+                    <div class="form-group">
+                        <label>Token In:</label>
+                        <input type="text" id="tokenIn" placeholder="Input token symbol">
+                    </div>
+                    <div class="form-group">
+                        <label>Amount In:</label>
+                        <input type="number" id="amountIn" placeholder="Amount to swap" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Min Amount Out:</label>
+                        <input type="number" id="minAmountOut" placeholder="Minimum output amount" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Trader Address:</label>
+                        <input type="text" id="traderAddress" placeholder="Your wallet address">
+                    </div>
+                    <button class="btn" onclick="performSwap()">Execute Swap</button>
+                    <div id="swapOutput" class="output" style="display: none;"></div>
+                </div>
+
+                <div class="card">
+                    <h3>Liquidity Pools</h3>
+                    <button class="btn" onclick="loadPools()">Load All Pools</button>
+                    <div id="poolsOutput" class="output" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="bridge" class="tab-content">
+            <div class="dashboard">
+                <div class="card">
+                    <h3>Bitcoin → Quantum</h3>
+                    <div class="form-group">
+                        <label>Bitcoin Transaction Hash:</label>
+                        <input type="text" id="btcTxHash" placeholder="Bitcoin transaction hash">
+                    </div>
+                    <div class="form-group">
+                        <label>BTC Amount:</label>
+                        <input type="number" id="btcAmount" placeholder="Bitcoin amount" step="0.001">
+                    </div>
+                    <div class="form-group">
+                        <label>Quantum Recipient:</label>
+                        <input type="text" id="quantumRecipient" placeholder="Quantum wallet address">
+                    </div>
+                    <button class="btn" onclick="lockBitcoin()">Lock Bitcoin & Mint Quantum</button>
+                    <div id="lockOutput" class="output" style="display: none;"></div>
+                </div>
+
+                <div class="card">
+                    <h3>Quantum → Bitcoin</h3>
+                    <div class="form-group">
+                        <label>Quantum Sender:</label>
+                        <input type="text" id="quantumSender" placeholder="Your quantum wallet">
+                    </div>
+                    <div class="form-group">
+                        <label>Quantum Amount:</label>
+                        <input type="number" id="quantumAmount" placeholder="Quantum tokens to burn" step="0.001">
+                    </div>
+                    <div class="form-group">
+                        <label>Bitcoin Recipient:</label>
+                        <input type="text" id="btcRecipient" placeholder="Bitcoin address">
+                    </div>
+                    <button class="btn" onclick="burnQuantum()">Burn Quantum & Unlock Bitcoin</button>
+                    <div id="burnOutput" class="output" style="display: none;"></div>
+                </div>
+
+                <div class="card">
+                    <h3>Bridge Statistics</h3>
+                    <button class="btn" onclick="loadBridgeStats()">Load Bridge Stats</button>
+                    <div id="bridgeStatsOutput" class="output" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="consensus" class="tab-content">
+            <div class="dashboard">
+                <div class="card">
+                    <h3>Register Validator</h3>
+                    <div class="form-group">
+                        <label>Validator Address:</label>
+                        <input type="text" id="validatorAddress" placeholder="Validator wallet address">
+                    </div>
+                    <div class="form-group">
+                        <label>Public Key:</label>
+                        <input type="text" id="validatorPubKey" placeholder="Quantum public key">
+                    </div>
+                    <div class="form-group">
+                        <label>Initial Stake:</label>
+                        <input type="number" id="initialStake" placeholder="Minimum 1000 tokens" min="1000">
+                    </div>
+                    <button class="btn" onclick="registerValidator()">Register Validator</button>
+                    <div id="validatorOutput" class="output" style="display: none;"></div>
+                </div>
+
+                <div class="card">
+                    <h3>Consensus Statistics</h3>
+                    <button class="btn" onclick="loadConsensusStats()">Load Consensus Stats</button>
+                    <div id="consensusStatsOutput" class="output" style="display: none;"></div>
+                </div>
+
+                <div class="card">
+                    <h3>Active Validators</h3>
+                    <button class="btn" onclick="loadValidators()">Load All Validators</button>
+                    <div id="validatorsOutput" class="output" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API base URL
+        const API_BASE = '/api';
+
+        // Current stats
+        let currentStats = {};
+
+        // Utility functions
+        function showTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to selected tab
+            event.target.classList.add('active');
+        }
+
+        function showOutput(elementId, content, isError = false) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.textContent = content;
+            element.className = `output ${isError ? 'error' : 'success'}`;
+        }
+
+        function showLoading(elementId) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.innerHTML = '<div class="loading"><div class="spinner"></div><p>Processing...</p></div>';
+            element.className = 'output';
+        }
+
+        async function apiCall(endpoint, method = 'GET', data = null) {
+            try {
+                const options = {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                };
+                
+                if (data) {
+                    options.body = JSON.stringify(data);
+                }
+                
+                const response = await fetch(`${API_BASE}${endpoint}`, options);
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(result.error || 'API call failed');
+                }
+                
+                return result;
+            } catch (error) {
+                console.error('API Error:', error);
+                throw error;
+            }
+        }
+
+        // Wallet functions
+        async function createWallet() {
+            showLoading('walletOutput');
+            try {
+                const wallet = await apiCall('/wallet/create', 'POST');
+                showOutput('walletOutput', 
+                    `Wallet Created Successfully!\n\n` +
+                    `Address: ${wallet.address}\n` +
+                    `Public Key: ${wallet.publicKey}\n` +
+                    `Balance: ${wallet.balance} tokens`
+                );
+            } catch (error) {
+                showOutput('walletOutput', `Error: ${error.message}`, true);
+            }
+        }
+
+        async function checkBalance() {
+            const address = document.getElementById('balanceAddress').value;
+            if (!address) {
+                showOutput('balanceOutput', 'Please enter a wallet address', true);
+                return;
+            }
+
+            showLoading('balanceOutput');
+            try {
+                const result = await apiCall(`/wallet/${address}/balance`);
+                showOutput('balanceOutput', 
+                    `Balance for ${result.address}: ${result.balance} tokens`
+                );
+            } catch (error) {
+                showOutput('balanceOutput', `Error: ${error.message}`, true);
+            }
+        }
+
+        async function sendTransaction() {
+            const fromAddress = document.getElementById('fromAddress').value;
+            const toAddress = document.getElementById('toAddress').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+
+            if (!fromAddress || !toAddress || !amount) {
+                showOutput('transactionOutput', 'Please fill in all fields', true);
+                return;
+            }
+
+            showLoading('transactionOutput');
+            try {
+                const result = await apiCall('/transaction/create', 'POST', {
+                    fromAddress,
+                    toAddress,
+                    amount
+                });
+                
+                showOutput('transactionOutput', 
+                    `Transaction Created!\n\n` +
+                    `Hash: ${result.transactionHash}\n` +
+                    `Status: ${result.message}`
+                );
+            } catch (error) {
+                showOutput('transactionOutput', `Error: ${error.message}`, true);
+            }
+        }
+
+        async function mineBlock() {
+            const minerAddress = document.getElementById('minerAddress').value;
+            if (!minerAddress) {
+                showOutput('miningOutput', 'Please enter miner address', true);
+                return;
+            }
+
+            showLoading('miningOutput');
+            try {
+                const result = await apiCall('/blockchain/mine', 'POST', { minerAddress });
+                showOutput('miningOutput', 
+                    `Block Mined Successfully!\n\n` +
+                    `Message: ${result.message}\n` +
+                    `Total Blocks: ${result.blockCount}`
+                );
+                
+                // Refresh stats
+                loadStats();
+            } catch (error) {
+                showOutput('miningOutput', `Error: ${error.message}`, true);
+            }
+        }
+
+        // DeFi functions
+        async function createPool() {
+            const tokenA = document.getElementById('tokenA').value;
+            const tokenB = document.getElementById('tokenB').value;
+            const amountA = parseFloat(document.getElementById('amountA').value);
+            const amountB = parseFloat(document.getElementById('amountB').value);
+            const creator = document.getElementById('poolCreator').value;
+
+            if (!tokenA || !tokenB || !amountA || !amountB || !creator) {
+                showOutput('poolOutput', 'Please fill in all fields', true);
+                return;
+            }
+
+            showLoading('poolOutput');
+            try {
+                const result = await apiCall('/defi/pool/create', 'POST', {
+                    tokenA, tokenB, amountA, amountB, creator
+                });
+                
+                showOutput('poolOutput', 
+                    `Liquidity Pool Created!\n\n` +
+                    `Pool ID: ${result.poolId}\n` +
+                    `Tokens: ${tokenA}/${tokenB}\n` +
+                    `Initial Liquidity: ${amountA}/${amountB}`
+                );
+            } catch (error) {
+                showOutput('poolOutput', `Error: ${error.message}`, true);
+            }
+        }
+
+        async function performSwap() {
+            const poolId = document.getElementById('swapPoolId').value;
+            const tokenIn = document.getElementById('tokenIn').value;
+            const amountIn = parseFloat(document.getElementById('amountIn').value);
+            const minAmountOut = parseFloat(document.getElementById('minAmountOut').value);
+            const trader = document.getElementById('traderAddress').value;
+
+            if (!poolId || !tokenIn || !amountIn || !minAmountOut || !trader) {
+                showOutput('swapOutput', 'Please fill in all fields', true);
+                return;
+            }
+
+            showLoading('swapOutput');
+            try {
+                const result = await apiCall('/defi/swap', 'POST', {
+                    poolId, tokenIn, amountIn, minAmountOut, trader
+                });
+                
+                showOutput('swapOutput', 
+                    `Swap Executed Successfully!\n\n` +
+                    `Amount Out: ${result.amountOut}\n` +
+                    `Fee Paid: ${result.fee}\n` +
+                    `Trader: ${trader}`
+                );
+            } catch (error) {
+                showOutput('swapOutput', `Error: ${error.message}`, true);
+            }
+        }
+
+        async function loadPools() {
+            showLoading('poolsOutput');
+            try {
+                const pools = await apiCall('/defi/pools');
+                
+                if (pools.length === 0) {
+                    showOutput('poolsOutput', 'No liquidity pools found');
+                    return;
+                }
+                
+                let output = 'Active Liquidity Pools:\n\n';
+                pools.forEach(pool => {
+                    output += `Pool ID: ${pool.id}\n`;
+                    output += `Tokens: ${pool.tokenA}/${pool.tokenB}\n`;
+                    output += `Reserves: ${pool.reserveA}/${pool.reserveB}\n`;
+                    output += `Total Liquidity: ${pool.totalLiquidity}\n`;
+                    output += `Creator: ${pool.creator}\n\n`;
+                });
+                
+                showOutput('poolsOutput', output);
+            } catch (error) {
+                showOutput('poolsOutput', `Error: ${error.message}`, true);
+            }
+        }
+
+        // Bridge functions
+        async function lockBitcoin() {
+            const bitcoinTxHash = document.getElementById('btcTxHash').value;
+            const amount = parseFloat(document.getElementById('btcAmount').value);
+            const quantumRecipient = document.getElementById('quantumRecipient').value;
+
+            if (!bitcoinTxHash || !amount || !quantumRecipient) {
+                showOutput('lockOutput', 'Please fill in all fields', true);
+                return;
+            }
+
+            showLoading('lockOutput');
+            try {
+                const result = await apiCall('/bridge/lock-bitcoin', 'POST', {
+                    bitcoinTxHash, amount, quantumRecipient
+                });
+                
+                showOutput('lockOutput', 
+                    `Bitcoin Locked Successfully!\n\n` +
+                    `Transfer ID: ${result.transferId}\n` +
+                    `Minted Quantum: ${result.mintAmount}\n` +
+                    `Bridge Fee: ${result.fee}\n` +
+                    `Recipient: ${quantumRecipient}`
+                );
+            } catch (error) {
+                showOutput('lockOutput', `Error: ${error.message}`, true);
+            }
+        }
+
+        async function burnQuantum() {
+            const quantumSender = document.getElementById('quantumSender').value;
+            const amount = parseFloat(document.getElementById('quantumAmount').value);
+            const bitcoinRecipient = document.getElementById('btcRecipient').value;
+
+            if (!quantumSender || !amount || !bitcoinRecipient) {
+                showOutput('burnOutput', 'Please fill in all fields', true);
+                return;
+            }
+
+            showLoading('burnOutput');
+            try {
+                const result = await apiCall('/bridge/burn-quantum', 'POST', {
+                    quantumSender, amount, bitcoinRecipient
+                });
+                
+                showOutput('burnOutput', 
+                    `Quantum Tokens Burned Successfully!\n\n` +
+                    `Transfer ID: ${result.transferId}\n` +
+                    `Unlocked Bitcoin: ${result.unlockAmount}\n` +
+                    `Bitcoin TX: ${result.bitcoinTxHash}\n` +
+                    `Bridge Fee: ${result.fee}`
+                );
+            } catch (error) {
+                showOutput('burnOutput', `Error: ${error.message}`, true);
+            }
+        }
+
+        async function loadBridgeStats() {
+            showLoading('bridgeStatsOutput');
+            try {
+                const stats = await apiCall('/bridge/stats');
+                
+                showOutput('bridgeStatsOutput', 
+                    `Bitcoin Bridge Statistics:\n\n` +
+                    `Genesis Address: ${stats.genesisAddress}\n` +
+                    `Bridge Contract: ${stats.bridgeContract}\n` +
+                    `Total BTC Locked: ${stats.totalLocked}\n` +
+                    `Total Quantum Minted: ${stats.totalMinted}\n` +
+                    `Total Transactions: ${stats.totalTransactions}\n` +
+                    `Bridge Fee: ${(stats.bridgeFee * 100).toFixed(1)}%\n` +
+                    `Active Locks: ${stats.activeLocks}\n` +
+                    `Pending Transfers: ${stats.pendingTransfers}`
+                );
+            } catch (error) {
+                showOutput('bridgeStatsOutput', `Error: ${error.message}`, true);
+            }
+        }
+
+        // Consensus functions
+        async function registerValidator() {
+            const address = document.getElementById('validatorAddress').value;
+            const publicKey = document.getElementById('validatorPubKey').value;
+            const initialStake = parseFloat(document.getElementById('initialStake').value);
+
+            if (!address || !publicKey || !initialStake) {
+                showOutput('validatorOutput', 'Please fill in all fields', true);
+                return;
+            }
+
+            if (initialStake < 1000) {
+                showOutput('validatorOutput', 'Minimum stake is 1000 tokens', true);
+                return;
+            }
+
+            showLoading('validatorOutput');
+            try {
+                const result = await apiCall('/consensus/register-validator', 'POST', {
+                    address, publicKey, initialStake
+                });
+                
+                showOutput('validatorOutput', 
+                    `Validator Registered Successfully!\n\n` +
+                    `Address: ${result.validator.address}\n` +
+                    `Stake: ${result.validator.stake}\n` +
+                    `Reputation: ${result.validator.reputation}\n` +
+                    `Joined Epoch: ${result.validator.joinedEpoch}`
+                );
+            } catch (error) {
+                showOutput('validatorOutput', `Error: ${error.message}`, true);
+            }
+        }
+
+        async function loadConsensusStats() {
+            showLoading('consensusStatsOutput');
+            try {
+                const stats = await apiCall('/consensus/stats');
+                
+                showOutput('consensusStatsOutput', 
+                    `Consensus Statistics:\n\n` +
+                    `Current Epoch: ${stats.currentEpoch}\n` +
+                    `Active Validators: ${stats.activeValidators}\n` +
+                    `Total Validators: ${stats.totalValidators}\n` +
+                    `Total Stake: ${stats.totalStake}\n` +
+                    `Total Voting Power: ${stats.totalVotingPower.toFixed(2)}\n` +
+                    `Average Reputation: ${stats.averageReputation.toFixed(1)}\n` +
+                    `Genesis Validator: ${stats.genesisValidator}\n` +
+                    `Quantum Algorithm: ${stats.quantumAlgorithm}`
+                );
+            } catch (error) {
+                showOutput('consensusStatsOutput', `Error: ${error.message}`, true);
+            }
+        }
+
+        async function loadValidators() {
+            showLoading('validatorsOutput');
+            try {
+                const validators = await apiCall('/consensus/validators');
+                
+                if (validators.length === 0) {
+                    showOutput('validatorsOutput', 'No validators found');
+                    return;
+                }
+                
+                let output = 'Active Validators:\n\n';
+                validators.forEach(validator => {
+                    output += `Address: ${validator.address}\n`;
+                    output += `Stake: ${validator.stake}\n`;
+                    output += `Reputation: ${validator.reputation}\n`;
+                    output += `Active: ${validator.isActive ? 'Yes' : 'No'}\n`;
+                    output += `Blocks Validated: ${validator.totalValidatedBlocks}\n`;
+                    output += `Joined Epoch: ${validator.joinedEpoch}\n\n`;
+                });
+                
+                showOutput('validatorsOutput', output);
+            } catch (error) {
+                showOutput('validatorsOutput', `Error: ${error.message}`, true);
+            }
+        }
+
+        // Load initial stats
+        async function loadStats() {
+            try {
+                const [blockchainInfo, consensusStats, bridgeStats] = await Promise.all([
+                    apiCall('/blockchain/info'),
+                    apiCall('/consensus/stats'),
+                    apiCall('/bridge/stats')
+                ]);
+
+                document.getElementById('blockCount').textContent = blockchainInfo.chainLength;
+                document.getElementById('validatorCount').textContent = consensusStats.activeValidators;
+                document.getElementById('bridgeLocked').textContent = bridgeStats.totalLocked.toFixed(3);
+                document.getElementById('currentEpoch').textContent = consensusStats.currentEpoch;
+            } catch (error) {
+                console.error('Failed to load stats:', error);
+            }
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStats();
+            
+            // Auto-refresh stats every 30 seconds
+            setInterval(loadStats, 30000);
+        });
+    </script>
+</body>
+</html>
