@@ -116,13 +116,13 @@ def main():
     
     # Add some blocks
     print("\n--- Mining Block 1 ---")
-    blockchain.add_block("Transaction: Alice -\u003e Bob: 10 BTC")
+    blockchain.add_block("Transaction: Alice -> Bob: 10 BTC")
     
     print("\n--- Mining Block 2 ---")
-    blockchain.add_block("Transaction: Bob -\u003e Charlie: 5 BTC")
+    blockchain.add_block("Transaction: Bob -> Charlie: 5 BTC")
     
     print("\n--- Mining Block 3 ---")
-    blockchain.add_block("Transaction: Charlie -\u003e Alice: 2 BTC")
+    blockchain.add_block("Transaction: Charlie -> Alice: 2 BTC")
     
     # Display the blockchain
     print("\n" + "=" * 80)
