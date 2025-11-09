@@ -241,10 +241,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- **Documentation**: [Wiki](https://github.com/your-username/quantum-blockchain-Genesis/wiki)
-- **Issues**: [GitHub Issues](https://github.com/your-username/quantum-blockchain-Genesis/issues)
-- **Discord**: [Community Server](https://discord.gg/quantum-genesis)
-- **Twitter**: [@QuantumGenesis](https://twitter.com/QuantumGenesis)
+- **Documentation**: [Wiki](https://github.com/your-username/quantum-blockchain-Genesis/
 
 ---
 
