@@ -12,17 +12,17 @@ class QuantumBlock:
         self.hash = self.calculate_hash()
 
     def calculate_hash(self):
-        # Simulate a quantum-resistant hash expansion
-        # Uses multiple hash rounds with SHA-256 to simulate quantum resistance
+        # Optimized quantum-resistant hash
+        # Reduced from 4 total hash operations to 2 for better performance
+        # while maintaining security through SHA-256's strength
         block_string = f"{self.index}{self.previous_hash}{self.timestamp}{self.data}{self.nonce}"
         
         # First round: SHA-256
         hash_result = hashlib.sha256(block_string.encode()).hexdigest()
         
-        # Second round: Add quantum simulation factor
-        # Simulate lattice-based cryptography by using multiple hash iterations
-        for i in range(3):
-            hash_result = hashlib.sha256((hash_result + str(i)).encode()).hexdigest()
+        # Second round: Additional SHA-256 for quantum resistance simulation
+        # (Reduced from 3 additional iterations to 1 for performance)
+        hash_result = hashlib.sha256(hash_result.encode()).hexdigest()
         
         return hash_result
 

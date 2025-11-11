@@ -82,8 +82,14 @@ class QuantumDeFiProtocol {
     }
 
     addLiquidity(poolId, amountA, amountB, provider) {
+        // Early validation
+        if (amountA <= 0 || amountB <= 0) throw new Error('Invalid liquidity amounts');
+        
         const pool = this.liquidityPools.get(poolId);
         if (!pool) throw new Error('Pool not found');
+        
+        // Validate pool has reserves
+        if (pool.reserveA <= 0 || pool.reserveB <= 0) throw new Error('Invalid pool state');
 
         const optimalAmountB = (amountA * pool.reserveB) / pool.reserveA;
         const optimalAmountA = (amountB * pool.reserveA) / pool.reserveB;
@@ -134,6 +140,10 @@ class QuantumDeFiProtocol {
     }
 
     swap(poolId, tokenIn, amountIn, minAmountOut, trader) {
+        // Early validation to avoid wasted computation
+        if (amountIn <= 0) throw new Error('Invalid input amount');
+        if (minAmountOut < 0) throw new Error('Invalid minimum output amount');
+        
         const pool = this.liquidityPools.get(poolId);
         if (!pool) throw new Error('Pool not found');
 
@@ -149,6 +159,9 @@ class QuantumDeFiProtocol {
             throw new Error('Invalid token');
         }
 
+        // Validate sufficient liquidity before computation
+        if (reserveOut <= 0) throw new Error('Insufficient liquidity');
+
         // Apply protocol fee
         const amountInWithFee = amountIn * (1 - this.protocolFee);
         
@@ -157,6 +170,11 @@ class QuantumDeFiProtocol {
 
         if (amountOut < minAmountOut) {
             throw new Error('Insufficient output amount');
+        }
+        
+        // Validate output doesn't exceed available liquidity
+        if (amountOut >= reserveOut) {
+            throw new Error('Output exceeds available liquidity');
         }
 
         // Update reserves
@@ -196,6 +214,9 @@ class QuantumDeFiProtocol {
     }
 
     stake(poolId, amount, staker) {
+        // Early validation
+        if (amount <= 0) throw new Error('Invalid stake amount');
+        
         const pool = this.stakingPools.get(poolId);
         if (!pool) throw new Error('Staking pool not found');
 
@@ -308,6 +329,10 @@ class QuantumDeFiProtocol {
     }
 
     borrow(poolId, amount, collateralAmount, borrower) {
+        // Early validation
+        if (amount <= 0) throw new Error('Invalid borrow amount');
+        if (collateralAmount <= 0) throw new Error('Invalid collateral amount');
+        
         const pool = this.lendingPools.get(poolId);
         if (!pool) throw new Error('Lending pool not found');
 

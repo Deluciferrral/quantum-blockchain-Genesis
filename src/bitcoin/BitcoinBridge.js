@@ -16,6 +16,9 @@ class BitcoinQuantumBridge {
         this.lockedFunds = new Map();
         this.pendingTransfers = new Map();
         this.bridgeFee = 0.001; // 0.1% bridge fee
+        
+        // Performance optimization: index transfers by address
+        this.transfersByAddress = new Map();
     }
 
     // Initialize the bridge with the genesis Bitcoin address
@@ -79,13 +82,24 @@ class BitcoinQuantumBridge {
             const transferId = crypto.randomUUID();
 
             // Lock the funds
-            this.lockedFunds.set(transferId, {
+            const lockData = {
                 bitcoinTxHash,
                 amount,
                 mintAmount,
                 quantumRecipient,
                 timestamp: Date.now(),
                 status: 'locked'
+            };
+            this.lockedFunds.set(transferId, lockData);
+            
+            // Index by address for fast lookup
+            this.indexTransferByAddress(quantumRecipient, {
+                transferId,
+                type: 'bitcoin_to_quantum',
+                amount,
+                mintAmount,
+                timestamp: lockData.timestamp,
+                status: lockData.status
             });
 
             // Mint quantum tokens
@@ -154,13 +168,24 @@ class BitcoinQuantumBridge {
             this.quantumBlockchain.addTransaction(burnTransaction);
 
             // Create pending Bitcoin transfer
-            this.pendingTransfers.set(transferId, {
+            const transferData = {
                 quantumSender,
                 bitcoinRecipient,
                 amount,
                 unlockAmount,
                 timestamp: Date.now(),
                 status: 'pending'
+            };
+            this.pendingTransfers.set(transferId, transferData);
+            
+            // Index by address for fast lookup
+            this.indexTransferByAddress(quantumSender, {
+                transferId,
+                type: 'quantum_to_bitcoin',
+                amount,
+                unlockAmount,
+                timestamp: transferData.timestamp,
+                status: transferData.status
             });
 
             // In production, this would trigger a Bitcoin transaction
@@ -194,8 +219,8 @@ class BitcoinQuantumBridge {
         // For demo purposes, we'll simulate verification
         console.log(`Verifying Bitcoin transaction ${txHash} for amount ${expectedAmount} - BitcoinBridge.js:195`);
         
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Removed artificial 1-second delay for performance
+        // In production, actual Bitcoin network queries would be performed here
         
         // Simulate verification logic
         const isValid = txHash.length === 64 && expectedAmount > 0;
@@ -267,39 +292,22 @@ class BitcoinQuantumBridge {
         };
     }
 
+    // Helper method to index transfers by address
+    indexTransferByAddress(address, transferData) {
+        if (!this.transfersByAddress.has(address)) {
+            this.transfersByAddress.set(address, []);
+        }
+        this.transfersByAddress.get(address).push(transferData);
+    }
+    
     // Get transfer history for an address
     getTransferHistory(address) {
-        const history = [];
+        // Use index for O(1) lookup instead of O(n) search
+        if (this.transfersByAddress.has(address)) {
+            return this.transfersByAddress.get(address).sort((a, b) => b.timestamp - a.timestamp);
+        }
         
-        // Search locked funds
-        for (const [transferId, lock] of this.lockedFunds) {
-            if (lock.quantumRecipient === address) {
-                history.push({
-                    transferId,
-                    type: 'bitcoin_to_quantum',
-                    amount: lock.amount,
-                    mintAmount: lock.mintAmount,
-                    timestamp: lock.timestamp,
-                    status: lock.status
-                });
-            }
-        }
-
-        // Search pending transfers
-        for (const [transferId, transfer] of this.pendingTransfers) {
-            if (transfer.quantumSender === address) {
-                history.push({
-                    transferId,
-                    type: 'quantum_to_bitcoin',
-                    amount: transfer.amount,
-                    unlockAmount: transfer.unlockAmount,
-                    timestamp: transfer.timestamp,
-                    status: transfer.status
-                });
-            }
-        }
-
-        return history.sort((a, b) => b.timestamp - a.timestamp);
+        return [];
     }
 
     // Emergency functions
