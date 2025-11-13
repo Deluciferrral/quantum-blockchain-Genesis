@@ -40,12 +40,14 @@ class QuantumGenesisApp {
     setupRoutes() {
         // Blockchain routes
         this.app.get('/api/blockchain/info', (req, res) => {
+            // Only validate chain if explicitly requested to avoid performance hit
+            const shouldValidate = req.query.validate === 'true';
             res.json({
                 chainLength: this.blockchain.chain.length,
                 difficulty: this.blockchain.difficulty,
                 genesisAddress: this.blockchain.genesisAddress,
                 pendingTransactions: this.blockchain.pendingTransactions.length,
-                isValid: this.blockchain.isChainValid()
+                isValid: shouldValidate ? this.blockchain.isChainValid() : undefined
             });
         });
 

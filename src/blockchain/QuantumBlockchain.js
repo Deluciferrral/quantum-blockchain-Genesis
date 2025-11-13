@@ -50,6 +50,11 @@ class QuantumBlockchain extends EventEmitter {
         this.pendingTransactions = [];
         this.miningReward = 100;
         this.genesisAddress = 'bc1qkm8plv5449r3t53dge6x6rmutk3wtkjlwczx8h';
+        
+        // Performance optimizations: caching
+        this.balanceCache = new Map();
+        this.transactionIndex = new Map(); // address -> transaction list
+        this.lastValidatedBlock = 0; // Track last validated block for incremental validation
     }
 
     createGenesisBlock() {
@@ -87,6 +92,11 @@ class QuantumBlockchain extends EventEmitter {
     }
 
     getBalance(address) {
+        // Check cache first
+        if (this.balanceCache.has(address)) {
+            return this.balanceCache.get(address);
+        }
+
         let balance = 0;
 
         for (const block of this.chain) {
@@ -101,6 +111,8 @@ class QuantumBlockchain extends EventEmitter {
             }
         }
 
+        // Cache the result
+        this.balanceCache.set(address, balance);
         return balance;
     }
 
@@ -129,8 +141,47 @@ class QuantumBlockchain extends EventEmitter {
         console.log('Block successfully mined!');
         this.chain.push(block);
         
+        // Invalidate cache and update index for affected addresses
+        this.invalidateBalanceCache(this.pendingTransactions);
+        this.updateTransactionIndex(this.pendingTransactions, block);
+        
         this.pendingTransactions = [];
         this.emit('blockMined', block);
+    }
+    
+    invalidateBalanceCache(transactions) {
+        for (const trans of transactions) {
+            if (trans.fromAddress) this.balanceCache.delete(trans.fromAddress);
+            if (trans.toAddress) this.balanceCache.delete(trans.toAddress);
+        }
+    }
+    
+    updateTransactionIndex(transactions, block) {
+        for (const trans of transactions) {
+            // Index by fromAddress
+            if (trans.fromAddress) {
+                if (!this.transactionIndex.has(trans.fromAddress)) {
+                    this.transactionIndex.set(trans.fromAddress, []);
+                }
+                this.transactionIndex.get(trans.fromAddress).push({
+                    ...trans,
+                    blockIndex: block.index,
+                    blockHash: block.hash
+                });
+            }
+            
+            // Index by toAddress
+            if (trans.toAddress) {
+                if (!this.transactionIndex.has(trans.toAddress)) {
+                    this.transactionIndex.set(trans.toAddress, []);
+                }
+                this.transactionIndex.get(trans.toAddress).push({
+                    ...trans,
+                    blockIndex: block.index,
+                    blockHash: block.hash
+                });
+            }
+        }
     }
 
     isTransactionValid(transaction) {
@@ -166,6 +217,12 @@ class QuantumBlockchain extends EventEmitter {
     }
 
     getTransactionHistory(address) {
+        // Use index for fast lookup if available
+        if (this.transactionIndex.has(address)) {
+            return this.transactionIndex.get(address);
+        }
+
+        // Fallback to full scan if not in index (e.g., genesis block)
         const transactions = [];
 
         for (const block of this.chain) {
@@ -178,6 +235,11 @@ class QuantumBlockchain extends EventEmitter {
                     });
                 }
             }
+        }
+
+        // Cache for next time
+        if (transactions.length > 0) {
+            this.transactionIndex.set(address, transactions);
         }
 
         return transactions;
