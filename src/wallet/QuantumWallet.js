@@ -25,14 +25,27 @@ class QuantumTransaction extends EventEmitter {
     }
 
     signTransaction(signingKey) {
-        if (signingKey.getPublic('hex') !== this.fromAddress) {
+        // Handle both elliptic keys and quantum wallets
+        const publicAddress = signingKey.address || (signingKey.getPublic && signingKey.getPublic('hex'));
+        
+        if (publicAddress !== this.fromAddress) {
             throw new Error('You cannot sign transactions for other wallets!');
         }
 
         const hashTx = this.calculateHash();
-        const sig = signingKey.sign(hashTx, 'base64');
         
-        this.signature = sig.toDER('hex');
+        // For quantum wallets, create signature using SHA3-512
+        if (signingKey.privateKey && !signingKey.sign) {
+            const signatureHash = crypto.createHash('sha3-512')
+                .update(signingKey.privateKey + hashTx)
+                .digest('hex');
+            this.signature = signatureHash;
+        } else {
+            // For elliptic keys
+            const sig = signingKey.sign(hashTx, 'base64');
+            this.signature = sig.toDER('hex');
+        }
+        
         this.quantumProof = this.generateQuantumProof();
     }
 
